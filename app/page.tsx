@@ -1,4 +1,5 @@
 import Navbar from "@/components/ui/Navbar";
+import SliderOne from "@/components/ui/Slider";
 import { Spotlight } from "@/components/ui/SpotlightNew";
 import Link from "next/link";
 
@@ -21,6 +22,11 @@ export default function Home() {
         </p>
         <Link href="/about" className="cursor-pointer flex items-center justify-center border rounded-full w-48 p-2 mx-auto my-6 text-white">
           Get Started! </Link>
+
+        <div className="w-full pt-20">
+          <SliderOne />0
+        </div>
+
 
       </div>
     </div >
