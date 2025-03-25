@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const BusinessAutomation = () => {
     return (
-        <div className="text-white my-24 relative">
+        <div id="business-automation" className="text-white my-24 relative">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-orange-900/20 z-0 rounded-2xl"></div>
             <div className="p-4 mx-auto relative z-10 w-full pt-10 md:pt-20 px-2 mb-16">
                 <div className="text-3xl pb-5 md:text-6xl px-6 text-center bg-clip-text text-transparent bg-gradient-to-b from-orange-300 to bg-amber-100 bg-opacity-50">
