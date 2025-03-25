@@ -39,6 +39,7 @@ const Navbar = () => {
                         <div className="hover:text-gray-50"> Sales Funnel </div>
                         <div className="hover:text-gray-50"> Paid Ads</div>
                         <div className="hover:text-gray-50"> Content Creation </div>
+                        <div className="hover:text-gray-50"> Automation </div>
 
                         <Link href="/pricing" className="hover:text-gray-50">
                             Pricing
