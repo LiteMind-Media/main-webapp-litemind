@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import { createPortal } from "react-dom";
 
 // Define and export the FormData interface so it can be imported elsewhere
 export interface FormData {
@@ -50,6 +51,13 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
         timeframe: formType === 'enterprise' ? "1-3 months" : "",
     });
 
+    const [mounted, setMounted] = useState(false);
+
+    // Set mounted only after component has been mounted on the client
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
@@ -77,7 +85,7 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
         onClose();
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || !mounted) return null;
 
     // Set the correct title and button text based on form type
     const title = customTitle ||
@@ -95,14 +103,10 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
             formType === 'demo' ? "Access Demo Video" :
                 "Schedule Consultation");
 
-    return (
+    // Use createPortal to render the modal at the document level
+    return createPortal(
         <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-hidden"
-            style={{
-                isolation: "isolate",
-                position: 'fixed',
-                zIndex: 10000 // Extremely high z-index
-            }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto z-[9999]"
             onClick={(e) => {
                 if (e.target === e.currentTarget) onClose();
             }}
@@ -113,7 +117,6 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
                 className="bg-gradient-to-b from-gray-900 to-black border border-orange-500/20 rounded-2xl max-w-lg w-full p-6 relative overflow-y-auto max-h-[90vh]"
-                style={{ zIndex: 10001 }} // Even higher z-index for the modal content
                 onClick={(e) => e.stopPropagation()}
             >
                 <button
@@ -319,7 +322,8 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
                     </div>
                 </form>
             </motion.div>
-        </div>
+        </div>,
+        document.body
     );
 };
 

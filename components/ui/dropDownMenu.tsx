@@ -1,3 +1,4 @@
+"use client"
 import { motion } from "framer-motion";
 import { useState } from "react";
 import ContactFormModal from "./ContactFormModal";
@@ -37,16 +38,25 @@ const DropDownMenu: React.FC<DropDownMenuProps> = ({ onClose }) => {
     return (
         <>
             <motion.div
+                className="fixed inset-0 bg-black/50 z-40"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={onClose}
+            />
+
+            <motion.div
                 className="
-                w-screen
-                h-screen
+                w-full
+                max-h-[80vh]
+                overflow-y-auto
                 bg-gradient-to-b
                 from-neutral-50
                 to-neutral-400
                 bg-opacity-50
                 text-slate-300
                 p-6 space-y-4
-                absolute
+                fixed
                 top-28
                 left-0
                 right-0
@@ -58,33 +68,21 @@ const DropDownMenu: React.FC<DropDownMenuProps> = ({ onClose }) => {
                 transition={{ duration: 0.5 }}
             >
                 <div className="flex flex-col space-y-10">
-                    <a onClick={() => handleClick('website-design')} className="text-black text-2xl cursor-pointer">
-                        Website Design
-                    </a>
+                    {["website-design", "sales-funnel", "paid-ads", "content-creation",
+                        "business-automation", "pricing"].map((section) => (
+                            <button
+                                key={section}
+                                onClick={() => handleClick(section)}
+                                className="text-black text-2xl cursor-pointer text-left hover:text-gray-700 transition-colors"
+                            >
+                                {section === "business-automation" ? "Business Automation" :
+                                    section.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                            </button>
+                        ))}
 
-                    <a onClick={() => handleClick('sales-funnel')} className="text-black text-2xl cursor-pointer">
-                        Sales Funnel
-                    </a>
-
-                    <a onClick={() => handleClick('paid-ads')} className="text-black text-2xl cursor-pointer">
-                        Paid Ads
-                    </a>
-
-                    <a onClick={() => handleClick('content-creation')} className="text-black text-2xl cursor-pointer">
-                        Content Creation
-                    </a>
-
-                    <a onClick={() => handleClick('business-automation')} className="text-black text-2xl cursor-pointer">
-                        Business Automation
-                    </a>
-
-                    <a onClick={() => handleClick('pricing')} className="text-black text-2xl cursor-pointer">
-                        Pricing
-                    </a>
-
-                    <a onClick={handleContactClick} className="text-black text-2xl cursor-pointer">
+                    <button onClick={handleContactClick} className="text-black text-2xl cursor-pointer text-left hover:text-gray-700 transition-colors">
                         Contact
-                    </a>
+                    </button>
                 </div>
             </motion.div>
 

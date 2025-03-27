@@ -7,14 +7,25 @@ import { AlignJustify, X } from "lucide-react"
 import DropDownMenu from "./dropDownMenu";
 import { AnimatePresence } from "framer-motion";
 import ContactFormModal from "./ContactFormModal";
+import { scrollToSection } from "@/utils/scrollUtils";
 
 const Navbar = () => {
     const [isDropdownVisible, setIsDropDownVisible] = useState(false);
     const [useHamburger, setUseHamburger] = useState(false);
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+    const [prevScrollPos, setPrevScrollPos] = useState(0);
+    const [visible, setVisible] = useState(true);
+
+    // Set mounted state after component mounts to prevent hydration issues
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Check if navbar needs to switch to hamburger menu
     useEffect(() => {
+        if (!isMounted) return;
+
         const checkNavSpace = () => {
             // Increase the breakpoint even more to give plenty of space
             const minRequiredWidth = 1180; // Increased from 1044 to 1180 pixels
@@ -33,7 +44,32 @@ const Navbar = () => {
         return () => {
             window.removeEventListener('resize', checkNavSpace);
         };
-    }, []);
+    }, [isMounted]);
+
+    // Handle scroll behavior
+    useEffect(() => {
+        if (!isMounted) return;
+
+        const handleScroll = () => {
+            const currentScrollPos = window.scrollY;
+
+            // Determine if scrolling up or down
+            const isScrollingDown = currentScrollPos > prevScrollPos;
+
+            // Only hide when scrolling down and past a certain point (e.g., 100px)
+            setVisible(!isScrollingDown || currentScrollPos < 100);
+
+            setPrevScrollPos(currentScrollPos);
+        };
+
+        // Add scroll event listener
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            // Clean up event listener
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, [isMounted, prevScrollPos]);
 
     const toggleDropDown = () => {
         setIsDropDownVisible(!isDropdownVisible);
@@ -43,97 +79,111 @@ const Navbar = () => {
         setIsDropDownVisible(false);
     }
 
-    const scrollToSection = (sectionId: string) => {
+    const handleScrollToSection = (sectionId: string) => {
         // Close dropdown if open
         if (isDropdownVisible) setIsDropDownVisible(false);
 
-        const section = document.getElementById(sectionId);
-        if (section) {
-            // Use a fixed offset for consistent behavior
-            const offset = 100; // Adjust this value as needed
-            const topPosition = section.getBoundingClientRect().top + window.pageYOffset - offset;
-
-            window.scrollTo({
-                top: topPosition,
-                behavior: "smooth"
-            });
-        }
+        // Use the imported utility function
+        scrollToSection(sectionId);
     };
 
+    // Calculate the height of navbar to use for layout adjustments
+    const navbarHeight = 100; // Increased from 80px to 100px for more spacing
+
     return (
-        <div>
-            <div className="p-6 md:p-4 flex items-center justify-between z-50">
-                <div className="flex-shrink-0">
-                    <Link className="cursor-pointer" href="/">
-                        <Image
-                            priority
-                            src="/logo.svg"
-                            height={100}
-                            width={100}
-                            alt="logo"
-                            className="w-20 h-20" // Fixed size, no responsive classes
-                            style={{ minWidth: '80px' }} // Ensure logo never shrinks below this size
-                        />
-                    </Link>
-                </div>
-
-                {/* Navigation items - only shown when there's enough space */}
-                {!useHamburger ? (
-                    <div className="flex items-center space-x-10 text-slate-300 text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">
-                        <div onClick={() => scrollToSection('website-design')} className="hover:text-gray-50 cursor-pointer whitespace-nowrap">Website Design</div>
-                        <div onClick={() => scrollToSection('sales-funnel')} className="hover:text-gray-50 cursor-pointer whitespace-nowrap">Sales Funnel</div>
-                        <div onClick={() => scrollToSection('paid-ads')} className="hover:text-gray-50 cursor-pointer whitespace-nowrap">Paid Ads</div>
-                        <div onClick={() => scrollToSection('content-creation')} className="hover:text-gray-50 cursor-pointer whitespace-nowrap">Content Creation</div>
-                        <div onClick={() => scrollToSection('business-automation')} className="hover:text-gray-50 cursor-pointer whitespace-nowrap">Automation</div>
-                        <div onClick={() => scrollToSection('pricing')} className="hover:text-gray-50 cursor-pointer whitespace-nowrap">Pricing</div>
-                    </div>
-                ) : null}
-
-                {/* Hamburger menu - shown when there's not enough space */}
-                {useHamburger ? (
-                    <div className="flex flex-shrink-0">
-                        {isDropdownVisible ? (
-                            <div
-                                onClick={toggleDropDown}
-                                className="w-8 h-8 text-slate-300 cursor-pointer"
-                            >
-                                <X />
-                                <AnimatePresence>
-                                    <DropDownMenu onClose={closeDropDown} />
-                                </AnimatePresence>
-                            </div>
-                        ) : (
-                            <AlignJustify
-                                onClick={toggleDropDown}
-                                className="w-8 h-8 text-slate-300 cursor-pointer"
+        <>
+            <header
+                className={`fixed top-0 w-full z-50 backdrop-blur-sm bg-transparent transition-transform duration-300 ${visible ? 'translate-y-0' : '-translate-y-full'
+                    }`}
+                style={{ height: `${navbarHeight}px` }} // Explicitly set height
+            >
+                <div className="p-8 md:py-6 flex items-center justify-between h-full">
+                    <div className="flex-shrink-0 z-20">
+                        <Link className="cursor-pointer" href="/">
+                            <Image
+                                priority
+                                src="/logo.svg"
+                                height={100}
+                                width={100}
+                                alt="logo"
+                                className="w-20 h-20" // Fixed size, no responsive classes
+                                style={{ minWidth: '80px' }} // Ensure logo never shrinks below this size
                             />
-                        )}
+                        </Link>
                     </div>
-                ) : (
-                    // Contact button - only shown when there's enough space
-                    <div className="flex-shrink-0">
-                        <button
-                            onClick={() => setIsContactModalOpen(true)}
-                            className="shadow-[inset_0_0_0_2px_#F8B846] text-white px-12 py-4 rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#FCC843] hover:text-black hover:shadow-[inset_0_0_0_2px_#FCC843] dark:text-neutral-200 transition duration-200"
-                        >
-                            Contact
-                        </button>
-                    </div>
-                )}
-            </div>
 
-            {/* Contact Form Modal */}
+                    {/* Navigation items - only shown when there's enough space */}
+                    {isMounted && !useHamburger ? (
+                        <nav className="flex items-center space-x-10 relative z-20">
+                            {["website-design", "sales-funnel", "paid-ads", "content-creation",
+                                "business-automation", "pricing"].map((section) => (
+                                    <button
+                                        key={section}
+                                        onClick={() => handleScrollToSection(section)}
+                                        className="text-slate-300 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
+                                    >
+                                        {section === "business-automation" ? "Automation" :
+                                            section.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                    </button>
+                                ))}
+                        </nav>
+                    ) : null}
+
+                    {/* Hamburger menu button - shown when there's not enough space */}
+                    {isMounted && useHamburger ? (
+                        <div className="flex flex-shrink-0 z-20">
+                            {isDropdownVisible ? (
+                                <button
+                                    onClick={toggleDropDown}
+                                    className="w-8 h-8 text-slate-300 cursor-pointer flex items-center justify-center"
+                                    aria-label="Close menu"
+                                >
+                                    <X size={24} />
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={toggleDropDown}
+                                    className="w-8 h-8 text-slate-300 cursor-pointer flex items-center justify-center"
+                                    aria-label="Open menu"
+                                >
+                                    <AlignJustify size={24} />
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        // Contact button - only shown when there's enough space
+                        isMounted && (
+                            <div className="flex-shrink-0 z-20">
+                                <button
+                                    onClick={() => setIsContactModalOpen(true)}
+                                    className="shadow-[inset_0_0_0_2px_#F8B846] text-white px-12 py-4 rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#FCC843] hover:text-black hover:shadow-[inset_0_0_0_2px_#FCC843] dark:text-neutral-200 transition duration-200"
+                                >
+                                    Contact
+                                </button>
+                            </div>
+                        )
+                    )}
+                </div>
+            </header>
+
+            {/* Add spacer div to push content below navbar with increased height */}
+            <div style={{ height: `${navbarHeight + 20}px` }} aria-hidden="true"></div>
+
+            {/* Mobile dropdown menu */}
             <AnimatePresence>
-                {isContactModalOpen && (
-                    <ContactFormModal
-                        isOpen={isContactModalOpen}
-                        onClose={() => setIsContactModalOpen(false)}
-                        formType="contact"
-                    />
-                )}
+                {isDropdownVisible && <DropDownMenu onClose={closeDropDown} />}
             </AnimatePresence>
-        </div>
+
+            {/* Contact Form Modal - rendered directly in the body */}
+            {isContactModalOpen && (
+                <ContactFormModal
+                    isOpen={isContactModalOpen}
+                    onClose={() => setIsContactModalOpen(false)}
+                    formType="contact"
+                />
+            )}
+        </>
     );
-}
+};
 
 export default Navbar;
