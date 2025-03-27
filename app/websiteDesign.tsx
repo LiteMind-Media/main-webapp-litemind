@@ -1,9 +1,12 @@
+"use client"
 import Image from "next/image";
 
 const WebsiteDesign = () => {
     return (
         <div id="website-design" className="text-white my-24 relative">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-orange-900/20 z-0 rounded-2xl"></div>
+
+            {/* Header section */}
             <div className="p-4 mx-auto relative z-10 w-full pt-10 md:pt-20 px-2">
                 <div className="text-3xl pb-5 md:text-6xl px-6 text-center bg-clip-text text-transparent bg-gradient-to-b from-orange-300 to bg-sky-100 bg-opacity-50">
                     Website Design <br /> that works!
@@ -13,7 +16,7 @@ const WebsiteDesign = () => {
                 </p>
             </div>
 
-            {/* Container for the image grid with proper padding */}
+            {/* Image grid container */}
             <div className="container mx-auto px-4 relative z-10 mb-12">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {/* First column */}
@@ -70,7 +73,7 @@ const WebsiteDesign = () => {
                 </div>
             </div>
 
-            {/* Short descriptive text and call to action */}
+            {/* CTA section */}
             <div className="container mx-auto px-4 relative z-10 mt-8 mb-8">
                 <div className="flex flex-col md:flex-row items-center justify-center gap-6 bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-orange-500/10">
                     <div className="md:w-3/4 text-center md:text-left">
@@ -82,7 +85,7 @@ const WebsiteDesign = () => {
                             href="https://portfolio.litemindmedia.com"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg font-medium transition-all duration-300 inline-block text-center w-full"
+                            className="px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg font-medium transition-all duration-300 inline-block text-center w-full hover:scale-105 hover:shadow-lg hover:shadow-orange-600/20 transform transition-all"
                         >
                             See Our Portfolio
                         </a>
@@ -90,7 +93,7 @@ const WebsiteDesign = () => {
                 </div>
             </div>
 
-            {/* Bottom padding and decorative element */}
+            {/* Bottom decorative element */}
             <div className="mt-8 container mx-auto px-4 relative z-10">
                 <div className="h-1 w-32 bg-gradient-to-r from-orange-500 to-amber-500 mx-auto rounded-full opacity-30"></div>
             </div>

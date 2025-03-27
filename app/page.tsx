@@ -1,9 +1,10 @@
 import Navbar from "@/components/ui/Navbar";
 import SliderOne from "@/components/ui/Slider";
 import { Spotlight } from "@/components/ui/SpotlightNew";
+import { Suspense } from "react";
 import dynamic from 'next/dynamic';
 
-// Use dynamic imports to isolate potential problem components
+// Use dynamic imports for better performance
 const WebsiteDesign = dynamic(() => import('./websiteDesign'), { ssr: true });
 const SalesFunnel = dynamic(() => import('./salesFunnel'), { ssr: true });
 const PaidAds = dynamic(() => import('./paidAds'), { ssr: true });
@@ -24,9 +25,11 @@ export default function Home() {
         <div className="text-4xl pb-5 md:text-7xl px-6 text-center bg-clip-text text-transparent bg-gradient-to-b from-orange-300 to-amber-100 bg-opacity-50">
           Create, Grow and <br /> Automate your Business
         </div>
+
         <p className="mt-4 text-lg font-normal text-center text-neutral-300 max-w-lg mx-auto px-4">
           Transforming businesses into fully automated online businesses using our Business Auto+ platform.
         </p>
+
         <a
           href="https://app.litemindmedia.com"
           target="_blank"
@@ -37,7 +40,9 @@ export default function Home() {
         </a>
 
         <div className="w-full pt-20">
-          <SliderOne />
+          <Suspense fallback={<div>Loading slider...</div>}>
+            <SliderOne />
+          </Suspense>
 
           {/* Add style to establish a proper stacking context */}
           <div className="relative" style={{ isolation: "isolate" }}>

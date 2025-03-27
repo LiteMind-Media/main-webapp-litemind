@@ -1,128 +1,155 @@
-"use client";
-import React from "react";
-import { motion } from "motion/react";
+"use client"
 
-type SpotlightProps = {
+import React, { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+
+interface SpotlightProps {
     gradientFirst?: string;
     gradientSecond?: string;
     gradientThird?: string;
-    translateY?: number;
-    width?: number;
-    height?: number;
-    smallWidth?: number;
-    duration?: number;
-    xOffset?: number;
-};
+}
 
-export const Spotlight = ({
-    gradientFirst = "radial-gradient(68.54% 68.72% at 55.02% 31.46%, hsla(210, 100%, 85%, .08) 0, hsla(210, 100%, 55%, .02) 50%, hsla(210, 100%, 45%, 0) 80%)",
-    gradientSecond = "radial-gradient(50% 50% at 50% 50%, hsla(210, 100%, 85%, .06) 0, hsla(210, 100%, 55%, .02) 80%, transparent 100%)",
-    gradientThird = "radial-gradient(50% 50% at 50% 50%, hsla(210, 100%, 85%, .04) 0, hsla(210, 100%, 45%, .02) 80%, transparent 100%)",
-    translateY = -350,
-    width = 560,
-    height = 1380,
-    smallWidth = 240,
-    duration = 7,
-    xOffset = 100,
-}: SpotlightProps = {}) => {
+export function Spotlight({
+    gradientFirst = "radial-gradient(600px circle at 50% 30%, hsla(0, 0%, 100%, .01), transparent 80%)",
+    gradientSecond = "radial-gradient(800px circle at 50% 50%, hsla(0, 0%, 100%, .01), transparent 80%)",
+    gradientThird = "radial-gradient(1000px circle at 30% 60%, hsla(0, 0%, 100%, .01), transparent 80%)",
+}: SpotlightProps) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [isHovering, setIsHovering] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+
+        // Initial animation even without hover
+        const interval = setInterval(() => {
+            if (!isHovering) {
+                const randomX = Math.random() * 100;
+                const randomY = Math.random() * 100;
+                setMousePosition({ x: randomX, y: randomY });
+            }
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [isHovering]);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!containerRef.current) return;
+
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+        setMousePosition({ x, y });
+        setIsHovering(true);
+    };
+
+    const handleMouseLeave = () => {
+        setIsHovering(false);
+    };
+
+    if (!isMounted) {
+        // Return a static version for server-side rendering
+        return (
+            <div className="fixed inset-0 w-screen h-screen z-0 overflow-hidden">
+                <div
+                    className="w-full h-full opacity-60"
+                    style={{
+                        background: gradientFirst,
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                    }}
+                />
+                <div
+                    className="w-full h-full opacity-40"
+                    style={{
+                        background: gradientSecond,
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                    }}
+                />
+                <div
+                    className="w-full h-full opacity-30"
+                    style={{
+                        background: gradientThird,
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                    }}
+                />
+            </div>
+        );
+    }
+
     return (
-        <motion.div
-            initial={{
-                opacity: 0,
-            }}
-            animate={{
-                opacity: 1,
-            }}
-            transition={{
-                duration: 1.5,
-            }}
-            className="pointer-events-none absolute inset-0 h-full w-full"
+        <div
+            ref={containerRef}
+            className="fixed inset-0 w-screen h-screen z-0 overflow-hidden"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
         >
             <motion.div
+                className="w-full h-full opacity-60"
+                style={{
+                    background: gradientFirst,
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
+                }}
                 animate={{
-                    x: [0, xOffset, 0],
+                    backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
                 }}
                 transition={{
-                    duration,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut",
+                    type: "spring",
+                    stiffness: 50,
+                    damping: 30,
+                    mass: 1,
                 }}
-                className="absolute top-0 left-0 w-screen h-screen z-40 pointer-events-none"
-            >
-                <div
-                    style={{
-                        transform: `translateY(${translateY}px) rotate(-45deg)`,
-                        background: gradientFirst,
-                        width: `${width}px`,
-                        height: `${height}px`,
-                    }}
-                    className={`absolute top-0 left-0`}
-                />
-
-                <div
-                    style={{
-                        transform: "rotate(-45deg) translate(5%, -50%)",
-                        background: gradientSecond,
-                        width: `${smallWidth}px`,
-                        height: `${height}px`,
-                    }}
-                    className={`absolute top-0 left-0 origin-top-left`}
-                />
-
-                <div
-                    style={{
-                        transform: "rotate(-45deg) translate(-180%, -70%)",
-                        background: gradientThird,
-                        width: `${smallWidth}px`,
-                        height: `${height}px`,
-                    }}
-                    className={`absolute top-0 left-0 origin-top-left`}
-                />
-            </motion.div>
-
+            />
             <motion.div
+                className="w-full h-full opacity-40"
+                style={{
+                    background: gradientSecond,
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
+                }}
                 animate={{
-                    x: [0, -xOffset, 0],
+                    backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
                 }}
                 transition={{
-                    duration,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut",
+                    type: "spring",
+                    stiffness: 30,
+                    damping: 20,
+                    mass: 1.2,
+                    delay: 0.1,
                 }}
-                className="absolute top-0 right-0 w-screen h-screen z-40 pointer-events-none"
-            >
-                <div
-                    style={{
-                        transform: `translateY(${translateY}px) rotate(45deg)`,
-                        background: gradientFirst,
-                        width: `${width}px`,
-                        height: `${height}px`,
-                    }}
-                    className={`absolute top-0 right-0`}
-                />
-
-                <div
-                    style={{
-                        transform: "rotate(45deg) translate(-5%, -50%)",
-                        background: gradientSecond,
-                        width: `${smallWidth}px`,
-                        height: `${height}px`,
-                    }}
-                    className={`absolute top-0 right-0 origin-top-right`}
-                />
-
-                <div
-                    style={{
-                        transform: "rotate(45deg) translate(180%, -70%)",
-                        background: gradientThird,
-                        width: `${smallWidth}px`,
-                        height: `${height}px`,
-                    }}
-                    className={`absolute top-0 right-0 origin-top-right`}
-                />
-            </motion.div>
-        </motion.div>
+            />
+            <motion.div
+                className="w-full h-full opacity-30"
+                style={{
+                    background: gradientThird,
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
+                }}
+                animate={{
+                    backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
+                }}
+                transition={{
+                    type: "spring",
+                    stiffness: 20,
+                    damping: 15,
+                    mass: 1.5,
+                    delay: 0.2,
+                }}
+            />
+        </div>
     );
-};
+}
