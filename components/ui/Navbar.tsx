@@ -6,10 +6,12 @@ import { useState, useEffect } from "react";
 import { AlignJustify, X } from "lucide-react"
 import DropDownMenu from "./dropDownMenu";
 import { AnimatePresence } from "framer-motion";
+import ContactFormModal from "./ContactFormModal";
 
 const Navbar = () => {
     const [isDropdownVisible, setIsDropDownVisible] = useState(false);
     const [useHamburger, setUseHamburger] = useState(false);
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
     // Check if navbar needs to switch to hamburger menu
     useEffect(() => {
@@ -110,12 +112,26 @@ const Navbar = () => {
                 ) : (
                     // Contact button - only shown when there's enough space
                     <div className="flex-shrink-0">
-                        <Link href="/contact" className="shadow-[inset_0_0_0_2px_#F8B846] text-white px-12 py-4 rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#FCC843] hover:text-black hover:shadow-[inset_0_0_0_2px_#FCC843] dark:text-neutral-200 transition duration-200">
+                        <button
+                            onClick={() => setIsContactModalOpen(true)}
+                            className="shadow-[inset_0_0_0_2px_#F8B846] text-white px-12 py-4 rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#FCC843] hover:text-black hover:shadow-[inset_0_0_0_2px_#FCC843] dark:text-neutral-200 transition duration-200"
+                        >
                             Contact
-                        </Link>
+                        </button>
                     </div>
                 )}
             </div>
+
+            {/* Contact Form Modal */}
+            <AnimatePresence>
+                {isContactModalOpen && (
+                    <ContactFormModal
+                        isOpen={isContactModalOpen}
+                        onClose={() => setIsContactModalOpen(false)}
+                        formType="contact"
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 }

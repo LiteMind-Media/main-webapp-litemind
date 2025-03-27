@@ -78,9 +78,14 @@ const WebsiteDesign = () => {
                         <p className="text-gray-300">Our custom websites are designed to captivate visitors and convert them into customers with intuitive navigation and strategic calls to action.</p>
                     </div>
                     <div className="md:w-1/4">
-                        <button className="px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg font-medium transition-all duration-300">
+                        <a
+                            href="https://portfolio.litemindmedia.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg font-medium transition-all duration-300 inline-block text-center w-full"
+                        >
                             See Our Portfolio
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

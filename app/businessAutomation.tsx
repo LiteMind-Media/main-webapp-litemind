@@ -1,8 +1,28 @@
+"use client"
 import Image from "next/image";
+import { useState } from "react";
+import ContactFormModal from "@/components/ui/ContactFormModal";
+import { useRouter } from "next/navigation";
+
+// Import the FormData interface from the ContactFormModal
+import type { FormData } from "@/components/ui/ContactFormModal";
 
 const BusinessAutomation = () => {
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+    const router = useRouter();
+
+    // Fix the any type by using the FormData interface
+    const handleDemoRequest = (formData: FormData) => {
+        // Store the form data in localStorage for the demo page to use
+        localStorage.setItem('demoUserInfo', JSON.stringify(formData));
+
+        // Redirect to the demo video page
+        router.push('/demo');
+    };
+
     return (
-        <div id="business-automation" className="text-white my-24 relative">
+        <div id="business-automation" className="text-white my-24 relative" style={{ zIndex: 1 }}>
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-orange-900/20 z-0 rounded-2xl"></div>
             <div className="p-4 mx-auto relative z-10 w-full pt-10 md:pt-20 px-2 mb-16">
                 <div className="text-3xl pb-5 md:text-6xl px-6 text-center bg-clip-text text-transparent bg-gradient-to-b from-orange-300 to bg-amber-100 bg-opacity-50">
@@ -34,10 +54,20 @@ const BusinessAutomation = () => {
                             Business Auto+ is LiteMind Media&apos;s proprietary automation platform designed to transform how entrepreneurs and businesses operate online. By automating repetitive tasks and streamlining workflows, we help you focus on growth and innovation.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <button className="px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white rounded-lg font-medium transition-all duration-300">
+                            <a
+                                href="https://app.litemindmedia.com/sign-up?feature=automation"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white rounded-lg font-medium transition-all duration-300 text-center"
+                            >
                                 Get Started
-                            </button>
-                            <button className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-lg font-medium transition-all duration-300">
+                            </a>
+                            <button
+                                onClick={() => {
+                                    setIsDemoModalOpen(true);
+                                }}
+                                className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-lg font-medium transition-all duration-300"
+                            >
                                 Watch Demo
                             </button>
                         </div>
@@ -185,7 +215,7 @@ const BusinessAutomation = () => {
                     </div>
                 </div>
 
-                {/* CTA Section - No need for a section title here as it's the final call-to-action */}
+                {/* CTA Section */}
                 <div className="mt-16 mb-8 text-center">
                     <div className="bg-white/5 backdrop-blur-sm rounded-xl p-8 border border-orange-500/10">
                         <h2 className="text-2xl md:text-4xl font-bold text-white mb-6">Ready to Automate Your Business?</h2>
@@ -193,16 +223,54 @@ const BusinessAutomation = () => {
                             Join thousands of businesses that have transformed their operations with LiteMind Media&apos;s Business Auto+ platform.
                         </p>
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
-                            <button className="px-8 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg font-medium transition-all duration-300">
+                            <a
+                                href="https://app.litemindmedia.com/sign-up?feature=automation"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-8 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white rounded-lg font-medium transition-all duration-300 text-center"
+                            >
                                 Get Started Now
-                            </button>
-                            <button className="px-8 py-3 bg-white/5 border border-orange-500/10 hover:bg-orange-900/30 text-orange-400 rounded-lg font-medium transition-all duration-300">
+                            </a>
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsContactModalOpen(true);
+                                }}
+                                className="px-8 py-3 bg-white/5 border border-orange-500/10 hover:bg-orange-900/30 text-orange-400 rounded-lg font-medium transition-all duration-300"
+                            >
                                 Book a Consultation
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Contact Form Modal for regular consultations */}
+            {isContactModalOpen && (
+                <div className="fixed inset-0 z-[9999]">
+                    <ContactFormModal
+                        isOpen={isContactModalOpen}
+                        onClose={() => setIsContactModalOpen(false)}
+                        consultationType="business-automation"
+                        formType="contact"
+                    />
+                </div>
+            )}
+
+            {/* Contact Form Modal for demo requests */}
+            {isDemoModalOpen && (
+                <div className="fixed inset-0 z-[9999]">
+                    <ContactFormModal
+                        isOpen={isDemoModalOpen}
+                        onClose={() => setIsDemoModalOpen(false)}
+                        consultationType="demo-request"
+                        formType="demo"
+                        submitButtonText="Access Demo Video"
+                        onSubmitSuccess={handleDemoRequest}
+                    />
+                </div>
+            )}
         </div>
     );
 }
