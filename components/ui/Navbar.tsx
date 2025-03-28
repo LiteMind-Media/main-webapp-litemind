@@ -8,8 +8,10 @@ import DropDownMenu from "./dropDownMenu";
 import { AnimatePresence } from "framer-motion";
 import ContactFormModal from "./ContactFormModal";
 import { scrollToSection } from "@/utils/scrollUtils";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
+    const pathname = usePathname();
     const [isDropdownVisible, setIsDropDownVisible] = useState(false);
     const [useHamburger, setUseHamburger] = useState(false);
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
@@ -83,6 +85,12 @@ const Navbar = () => {
         // Close dropdown if open
         if (isDropdownVisible) setIsDropDownVisible(false);
 
+        // If not on home page, navigate to home page first
+        if (pathname !== '/') {
+            window.location.href = `/#${sectionId}`;
+            return;
+        }
+
         // Use the imported utility function
         scrollToSection(sectionId);
     };
@@ -115,17 +123,45 @@ const Navbar = () => {
                     {/* Navigation items - only shown when there's enough space */}
                     {isMounted && !useHamburger ? (
                         <nav className="flex items-center space-x-10 relative z-20">
-                            {["website-design", "sales-funnel", "paid-ads", "content-creation",
-                                "business-automation", "pricing"].map((section) => (
-                                    <button
-                                        key={section}
-                                        onClick={() => handleScrollToSection(section)}
-                                        className="text-slate-300 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
-                                    >
-                                        {section === "business-automation" ? "Automation" :
-                                            section.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                                    </button>
-                                ))}
+                            {/* Main site sections - using handleScrollToSection for home page sections */}
+                            <button
+                                onClick={() => handleScrollToSection('website-design')}
+                                className="text-slate-300 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
+                            >
+                                Website Design
+                            </button>
+                            <button
+                                onClick={() => handleScrollToSection('sales-funnel')}
+                                className="text-slate-300 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
+                            >
+                                Sales Funnel
+                            </button>
+                            <button
+                                onClick={() => handleScrollToSection('paid-ads')}
+                                className="text-slate-300 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
+                            >
+                                Paid Ads
+                            </button>
+                            <button
+                                onClick={() => handleScrollToSection('content-creation')}
+                                className="text-slate-300 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
+                            >
+                                Content Creation
+                            </button>
+                            <button
+                                onClick={() => handleScrollToSection('business-automation')}
+                                className="text-slate-300 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
+                            >
+                                Automation
+                            </button>
+
+                            {/* Pricing now links to separate page */}
+                            <Link
+                                href="/pricing"
+                                className="text-slate-300 hover:text-white cursor-pointer whitespace-nowrap transition-colors"
+                            >
+                                Pricing
+                            </Link>
                         </nav>
                     ) : null}
 
@@ -171,7 +207,7 @@ const Navbar = () => {
 
             {/* Mobile dropdown menu */}
             <AnimatePresence>
-                {isDropdownVisible && <DropDownMenu onClose={closeDropDown} />}
+                {isDropdownVisible && <DropDownMenu onClose={closeDropDown} currentPath={pathname} />}
             </AnimatePresence>
 
             {/* Contact Form Modal - rendered directly in the body */}

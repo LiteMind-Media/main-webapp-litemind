@@ -2,16 +2,24 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import ContactFormModal from "./ContactFormModal";
+import Link from "next/link";
 
 interface DropDownMenuProps {
     onClose: () => void;
+    currentPath?: string;
 }
 
-const DropDownMenu: React.FC<DropDownMenuProps> = ({ onClose }) => {
+const DropDownMenu: React.FC<DropDownMenuProps> = ({ onClose, currentPath = '/' }) => {
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
     const handleClick = (sectionId: string) => {
         onClose();
+
+        // If not on home page, navigate to home with hash
+        if (currentPath !== '/') {
+            window.location.href = `/#${sectionId}`;
+            return;
+        }
 
         // Add slight delay to allow animation to complete
         setTimeout(() => {
@@ -68,17 +76,48 @@ const DropDownMenu: React.FC<DropDownMenuProps> = ({ onClose }) => {
                 transition={{ duration: 0.5 }}
             >
                 <div className="flex flex-col space-y-10">
-                    {["website-design", "sales-funnel", "paid-ads", "content-creation",
-                        "business-automation", "pricing"].map((section) => (
-                            <button
-                                key={section}
-                                onClick={() => handleClick(section)}
-                                className="text-black text-2xl cursor-pointer text-left hover:text-gray-700 transition-colors"
-                            >
-                                {section === "business-automation" ? "Business Automation" :
-                                    section.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                            </button>
-                        ))}
+                    <button
+                        onClick={() => handleClick('website-design')}
+                        className="text-black text-2xl cursor-pointer text-left hover:text-gray-700 transition-colors"
+                    >
+                        Website Design
+                    </button>
+
+                    <button
+                        onClick={() => handleClick('sales-funnel')}
+                        className="text-black text-2xl cursor-pointer text-left hover:text-gray-700 transition-colors"
+                    >
+                        Sales Funnel
+                    </button>
+
+                    <button
+                        onClick={() => handleClick('paid-ads')}
+                        className="text-black text-2xl cursor-pointer text-left hover:text-gray-700 transition-colors"
+                    >
+                        Paid Ads
+                    </button>
+
+                    <button
+                        onClick={() => handleClick('content-creation')}
+                        className="text-black text-2xl cursor-pointer text-left hover:text-gray-700 transition-colors"
+                    >
+                        Content Creation
+                    </button>
+
+                    <button
+                        onClick={() => handleClick('business-automation')}
+                        className="text-black text-2xl cursor-pointer text-left hover:text-gray-700 transition-colors"
+                    >
+                        Business Automation
+                    </button>
+
+                    <Link
+                        href="/pricing"
+                        onClick={onClose}
+                        className="text-black text-2xl cursor-pointer text-left hover:text-gray-700 transition-colors"
+                    >
+                        Pricing
+                    </Link>
 
                     <button onClick={handleContactClick} className="text-black text-2xl cursor-pointer text-left hover:text-gray-700 transition-colors">
                         Contact

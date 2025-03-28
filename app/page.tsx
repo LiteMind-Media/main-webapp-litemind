@@ -3,14 +3,15 @@ import SliderOne from "@/components/ui/Slider";
 import { Spotlight } from "@/components/ui/SpotlightNew";
 import { Suspense } from "react";
 import dynamic from 'next/dynamic';
+import Footer from "@/components/ui/Footer";
 
 // Use dynamic imports for better performance
 const WebsiteDesign = dynamic(() => import('./websiteDesign'), { ssr: true });
 const SalesFunnel = dynamic(() => import('./salesFunnel'), { ssr: true });
 const PaidAds = dynamic(() => import('./paidAds'), { ssr: true });
 const ContentCreation = dynamic(() => import('./contentCreation'), { ssr: true });
-const Pricing = dynamic(() => import('./pricing'), { ssr: true });
 const BusinessAutomation = dynamic(() => import('./businessAutomation'), { ssr: true });
+// Pricing is now a separate page
 
 export default function Home() {
   return (
@@ -72,12 +73,12 @@ export default function Home() {
               <BusinessAutomation />
             </div>
 
-            <div className="relative z-[1]">
-              <Pricing />
-            </div>
+            {/* Pricing section removed and moved to its own page */}
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
