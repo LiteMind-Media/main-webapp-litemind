@@ -6,8 +6,6 @@ import { Spotlight } from "@/components/ui/SpotlightNew";
 import { Suspense } from "react";
 import dynamic from 'next/dynamic';
 import Footer from "@/components/ui/Footer";
-import ContactFormModal from "@/components/ui/ContactFormModal";
-import { usePathname } from "next/navigation";
 
 // Use dynamic imports for better performance
 const WebsiteDesign = dynamic(() => import('./websiteDesign'), { ssr: true });

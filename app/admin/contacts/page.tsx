@@ -39,7 +39,7 @@ export default function ContactsDashboard() {
     const formatDate = (timestamp: number) => {
         try {
             return new Date(timestamp).toLocaleString();
-        } catch (e) {
+        } catch {
             return "Invalid date";
         }
     };
@@ -51,9 +51,9 @@ export default function ContactsDashboard() {
                 throw new Error("Could not connect to the database");
             }
             await markAsRead({ id });
-        } catch (err) {
-            console.error("Error marking contact as read:", err);
-            setError(err instanceof Error ? err.message : "An error occurred");
+        } catch (error) {
+            console.error("Error marking contact as read:", error);
+            setError(error instanceof Error ? error.message : "An error occurred");
         }
     };
 
