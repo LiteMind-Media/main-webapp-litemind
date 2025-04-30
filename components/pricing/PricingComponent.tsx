@@ -40,13 +40,13 @@ const PricingComponent = () => {
         {
             name: "Free Forever",
             price: "0",
-            description: "Basic features for individuals and small projects",
+            description: "Perfect for entrepreneurs and professionals looking to establish their online presence",
             features: [
-                "1 project",
-                "Basic website",
-                "Standard support",
-                "Limited content creation",
-                "Basic analytics"
+                "Professional LinkTree",
+                "Digital Business Card tracking",
+                "Basic AI content agent",
+                "Basic analytics",
+                "Email support"
             ],
             highlighted: false,
             buttonText: "Get Started",
@@ -59,14 +59,15 @@ const PricingComponent = () => {
             price: isAnnual ? "1,490" : "149",
             description: "Advanced features for established businesses",
             features: [
-                "10 projects",
-                "Advanced website & SEO",
-                "Priority phone support",
-                "Weekly content calendar",
-                "Full social management",
-                "Advanced funnel creation",
-                "Email marketing campaigns",
-                "Basic paid ads management"
+                "Everything in Advanced plan",
+                "2 Digital Business Infrastructures",
+                "Advanced sales funnels",
+                "Email marketing (2,000 contacts)",
+                "Digital point of sale system",
+                "Full business accounting dashboard",
+                "Client management dashboard",
+                "Premium AI content agent",
+                "Priority phone & email support"
             ],
             highlighted: true, // Changed back to true to enable highlighting
             buttonText: "Get Started",
@@ -79,12 +80,14 @@ const PricingComponent = () => {
             price: isAnnual ? "670" : "67",
             description: "Everything you need for a growing business",
             features: [
-                "5 projects",
-                "Professional website & SEO",
-                "Priority email support",
-                "Weekly content updates",
-                "Social media management",
-                "Basic funnel creation"
+                "Everything in Free Forever plan",
+                "1 Digital Business Infrastructure",
+                "Basic sales funnels",
+                "Email marketing (500 contacts)",
+                "Basic business accounting",
+                "Advanced AI content agent",
+                "Enhanced analytics",
+                "Priority email support"
             ],
             highlighted: false,
             buttonText: "Get Started",
@@ -99,17 +102,18 @@ const PricingComponent = () => {
         {
             name: "Premium",
             price: isAnnual ? "6,970" : "697",
-            description: "Complete solution for serious growth",
+            description: "Complete solution for serious growth with managed services",
             features: [
-                "Unlimited projects",
-                "Custom website development",
+                "Everything in Pro plan",
+                "5 Digital Business Infrastructures",
+                "Managed Google & Meta ad campaigns",
+                "Custom content calendar creation",
+                "Social media management",
+                "Full funnel campaign management",
+                "Advanced SEO optimization",
+                "Monthly performance reporting",
                 "Dedicated account manager",
-                "Daily content calendar",
-                "Full social management",
-                "Advanced funnel creation",
-                "Complete email automation",
-                "Full paid ads management",
-                "Detailed analytics & reporting"
+                "Priority 24/7 support"
             ],
             highlighted: false,
             buttonText: "Get Started",
@@ -119,21 +123,23 @@ const PricingComponent = () => {
         },
         {
             name: "Custom",
-            // Now the custom price changes based on billing frequency
             price: isAnnual ? "Custom" : "8,000+",
-            description: "Enterprise-grade solution tailored to your needs",
+            description: "Enterprise-grade full-service digital growth solution",
             features: [
-                "Everything in Premium",
-                "White-label solutions",
-                "API access",
-                "Custom integrations",
-                "Enterprise SLA",
-                "Dedicated development team"
+                "Everything in Premium plan",
+                "Unlimited Digital Business Infrastructures",
+                "Full-scale digital marketing team",
+                "Comprehensive ad campaign management",
+                "Multi-channel content strategy",
+                "Custom web & app development",
+                "Dedicated growth strategist",
+                "Executive business consulting",
+                "White-label & custom integrations",
+                "Quarterly strategy meetings"
             ],
             highlighted: false,
             buttonText: "Contact Us",
             buttonOnClick: () => setIsCustomModalOpen(true),
-            // Adjust the price label based on billing frequency
             priceLabel: isAnnual ? "Annual quote" : "/month + fees",
             badge: "ENTERPRISE"
         }

@@ -1,0 +1,5 @@
+{
+  "selfHosted": true,
+  "url": "${CONVEX_URL}",
+  "admin": "${CONVEX_ADMIN_URL}"
+}

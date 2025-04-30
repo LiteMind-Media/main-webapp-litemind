@@ -1,9 +1,13 @@
+"use client"
+
 import Navbar from "@/components/ui/Navbar";
 import SliderOne from "@/components/ui/Slider";
 import { Spotlight } from "@/components/ui/SpotlightNew";
 import { Suspense } from "react";
 import dynamic from 'next/dynamic';
 import Footer from "@/components/ui/Footer";
+import ContactFormModal from "@/components/ui/ContactFormModal";
+import { usePathname } from "next/navigation";
 
 // Use dynamic imports for better performance
 const WebsiteDesign = dynamic(() => import('./websiteDesign'), { ssr: true });
@@ -12,6 +16,9 @@ const PaidAds = dynamic(() => import('./paidAds'), { ssr: true });
 const ContentCreation = dynamic(() => import('./contentCreation'), { ssr: true });
 const BusinessAutomation = dynamic(() => import('./businessAutomation'), { ssr: true });
 // Pricing is now a separate page
+
+// Create a client component for the Get Started button
+const GetStartedButton = dynamic(() => import('@/components/ui/GetStartedButton'), { ssr: false });
 
 export default function Home() {
   return (
@@ -33,14 +40,8 @@ export default function Home() {
             Transforming businesses into fully automated online businesses using our Business Auto+ platform.
           </p>
 
-          <a
-            href="https://app.litemindmedia.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cursor-pointer flex items-center justify-center border border-orange-500/20 hover:border-orange-500/40 rounded-full w-48 p-2 mx-auto my-6 text-white hover:bg-orange-500/10 transition-all duration-300"
-          >
-            Get Started!
-          </a>
+          {/* Replace anchor tag with the client component */}
+          <GetStartedButton />
         </div>
 
         <div className="w-full pt-20">

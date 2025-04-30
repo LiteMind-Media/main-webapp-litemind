@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { createPortal } from "react-dom";
+import { useContactForm, SubmissionSource } from "@/hooks/useContactForm";
 
 // Define and export the FormData interface so it can be imported elsewhere
 export interface FormData {
@@ -26,7 +27,8 @@ interface ContactFormModalProps {
     customDescription?: string;
     submitButtonText?: string;
     onSubmitSuccess?: (formData: FormData) => void;
-    formType?: 'contact' | 'enterprise' | 'demo';  // Add a form type prop
+    formType?: 'contact' | 'enterprise' | 'demo';
+    source?: SubmissionSource;
 }
 
 const ContactFormModal: React.FC<ContactFormModalProps> = ({
@@ -37,7 +39,8 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
     customDescription,
     submitButtonText,
     onSubmitSuccess,
-    formType = 'contact'  // Default to contact form
+    formType = 'contact',
+    source = "website"
 }) => {
     const [formData, setFormData] = useState<FormData>({
         name: "",
@@ -53,6 +56,9 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
 
     const [mounted, setMounted] = useState(false);
 
+    // Use our custom contact form hook
+    const { handleSubmit, isSubmitting, error, success } = useContactForm();
+
     // Set mounted only after component has been mounted on the client
     useEffect(() => {
         setMounted(true);
@@ -63,26 +69,32 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // If we have a custom submit handler (for demo requests), use it
-        if (onSubmitSuccess) {
-            onSubmitSuccess(formData);
-        } else {
-            // Regular form submission logic
-            console.log("Form submitted:", formData);
+        try {
+            // Submit the form data to Convex
+            const result = await handleSubmit(formData, formType, source);
 
-            // Different success messages based on form type
-            if (formType === 'enterprise') {
-                alert("Thank you for your enterprise inquiry! Our team will review your needs and get back to you within 24 hours.");
-            } else {
-                alert("Thank you for your submission! We will contact you shortly.");
+            if (result) {
+                // If we have a custom submit handler, call it
+                if (onSubmitSuccess) {
+                    onSubmitSuccess(formData);
+                } else {
+                    // Different success messages based on form type
+                    if (formType === 'enterprise') {
+                        alert("Thank you for your enterprise inquiry! Our team will review your needs and get back to you within 24 hours.");
+                    } else {
+                        alert("Thank you for your submission! We will contact you shortly.");
+                    }
+                }
+
+                // Close the modal after submission
+                onClose();
             }
+        } catch (error) {
+            console.error("Error submitting form:", error);
         }
-
-        // Close the modal after submission
-        onClose();
     };
 
     if (!isOpen || !mounted) return null;
@@ -135,7 +147,21 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={onSubmit} className="space-y-4">
+                    {/* Display error if any */}
+                    {error && (
+                        <div className="bg-red-500/10 border border-red-500 text-red-500 p-3 rounded-md text-sm">
+                            {error}
+                        </div>
+                    )}
+
+                    {/* Display success message if submission was successful */}
+                    {success && !error && (
+                        <div className="bg-green-500/10 border border-green-500 text-green-500 p-3 rounded-md text-sm">
+                            Form submitted successfully!
+                        </div>
+                    )}
+
                     {/* Common fields for all form types */}
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
@@ -315,9 +341,11 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
                     <div className="pt-4">
                         <button
                             type="submit"
-                            className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-lg font-medium transition-all duration-300"
+                            disabled={isSubmitting}
+                            className={`w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-lg font-medium transition-all duration-300 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
+                                }`}
                         >
-                            {buttonText}
+                            {isSubmitting ? 'Submitting...' : buttonText}
                         </button>
                     </div>
                 </form>

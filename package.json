@@ -6,7 +6,14 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "dev:convex": "convex dev",
+    "convex:deploy": "convex deploy",
+    "convex:dev": "convex dev",
+    "convex:deploy:self": "bash scripts/deploy-convex.sh",
+    "docker:convex:up": "docker-compose -f docker-compose.convex.yml up -d",
+    "docker:convex:down": "docker-compose -f docker-compose.convex.yml down",
+    "docker:convex:logs": "docker-compose -f docker-compose.convex.yml logs -f"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -24,7 +31,8 @@
     "react-slick": "^0.30.3",
     "slick-carousel": "^1.8.1",
     "tailwind-merge": "^3.0.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "convex": "^1.2.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

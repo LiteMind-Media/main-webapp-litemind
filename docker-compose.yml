@@ -1,0 +1,47 @@
+version: "3.7"
+
+services:
+  # Convex self-hosted database
+  convex:
+    image: convex/server:latest
+    container_name: convex-server
+    ports:
+      - "8000:8000" # API port
+      - "8001:8001" # Admin dashboard
+    environment:
+      - CONVEX_ADMIN_PASSWORD=${CONVEX_ADMIN_PASSWORD:-your_secure_password_here}
+      - CONVEX_HOST_DOMAIN=${CONVEX_HOST_DOMAIN:-localhost}
+    volumes:
+      - ./convex-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Next.js web application
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: litemind-webapp
+    ports:
+      - "3000:3000" # Next.js port
+    environment:
+      - NEXT_PUBLIC_CONVEX_URL=http://localhost:8000
+      - CONVEX_ADMIN_URL=http://localhost:8001
+      - NODE_ENV=production
+    depends_on:
+      - convex
+    restart: unless-stopped
+
+volumes:
+  convex-data:
+    driver: local
