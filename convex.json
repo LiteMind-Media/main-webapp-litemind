@@ -1,5 +1,5 @@
 {
   "selfHosted": true,
-  "url": "${CONVEX_URL}",
-  "admin": "${CONVEX_ADMIN_URL}"
+  "url": "http://localhost:8000",
+  "admin": "http://localhost:8001/dashboard"
 }

@@ -1,169 +1,133 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Id } from "@/convex/_generated/dataModel";
-import Navbar from "@/components/ui/Navbar";
 
-export default function ContactsDashboard() {
-    const [view, setView] = useState<"all" | "unread">("all");
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+// Define a Contact interface that matches your Convex schema
+interface Contact {
+  _id: Id<"contacts">;
+  _creationTime: number;
+  name: string;
+  email: string;
+  phone?: string;
+  businessName?: string;
+  consultationType?: string;
+  message?: string;
+  companySize?: string;
+  budget?: string;
+  timeframe?: string;
+  formType?: string;
+  source?: string;
+  createdAt: number;
+  isRead: boolean;
+}
 
-    // Get contacts data from Convex with proper error handling
-    const allContactsQuery = useQuery(api?.contacts?.getAllContacts);
-    const unreadContactsQuery = useQuery(api?.contacts?.getUnreadContacts);
+export default function ContactsAdminPage() {
+  const contacts = useQuery(api.contacts.getAll);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
-    // Use safe defaults
-    const allContacts = allContactsQuery || [];
-    const unreadContacts = unreadContactsQuery || [];
-
-    // Use the markAsRead mutation with error handling
-    const markAsRead = useMutation(api?.contacts?.markContactAsRead);
-
-    // Choose which contacts to display based on the view state
-    const contacts = view === "all" ? allContacts : unreadContacts;
-
-    // Track loading state
-    useEffect(() => {
-        if (allContactsQuery === undefined) {
-            setIsLoading(true);
-            setError(null);
-        } else {
-            setIsLoading(false);
-        }
-    }, [allContactsQuery]);
-
-    // Format timestamp to readable date
-    const formatDate = (timestamp: number) => {
-        try {
-            return new Date(timestamp).toLocaleString();
-        } catch {
-            return "Invalid date";
-        }
-    };
-
-    // Handle marking a contact as read with error handling
-    const handleMarkAsRead = async (id: Id<"contacts">) => {
-        try {
-            if (!markAsRead) {
-                throw new Error("Could not connect to the database");
-            }
-            await markAsRead({ id });
-        } catch (error) {
-            console.error("Error marking contact as read:", error);
-            setError(error instanceof Error ? error.message : "An error occurred");
-        }
-    };
-
-    return (
-        <div className="min-h-screen bg-gray-900">
-            <Navbar />
-            <div className="container mx-auto px-4 py-16">
-                <div className="bg-black/30 rounded-xl p-8 backdrop-blur-sm border border-amber-500/10">
-                    <h1 className="text-3xl font-bold text-amber-200 mb-8">Contact Form Submissions</h1>
-
-                    {/* Show error message if any */}
-                    {error && (
-                        <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-md mb-6">
-                            Error: {error}
-                            <button
-                                onClick={() => window.location.reload()}
-                                className="ml-4 underline hover:text-red-400"
-                            >
-                                Retry
-                            </button>
-                        </div>
-                    )}
-
-                    {/* View toggle */}
-                    <div className="flex gap-4 mb-6">
-                        <button
-                            onClick={() => setView("all")}
-                            className={`px-4 py-2 rounded-lg transition-all ${view === "all"
-                                ? "bg-orange-500 text-white"
-                                : "bg-black/50 text-gray-300 hover:bg-black/70"
-                                }`}
-                        >
-                            All Contacts
-                        </button>
-                        <button
-                            onClick={() => setView("unread")}
-                            className={`px-4 py-2 rounded-lg transition-all ${view === "unread"
-                                ? "bg-orange-500 text-white"
-                                : "bg-black/50 text-gray-300 hover:bg-black/70"
-                                }`}
-                        >
-                            Unread ({unreadContacts?.length || 0})
-                        </button>
-                    </div>
-
-                    {/* Contacts table with loading state */}
-                    <div className="rounded-lg overflow-hidden">
-                        {isLoading ? (
-                            <div className="p-6 text-gray-400 text-center">
-                                Loading contacts...
-                                <div className="mt-4 flex justify-center">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-orange-500"></div>
-                                </div>
-                            </div>
-                        ) : contacts?.length === 0 ? (
-                            <p className="p-6 text-gray-400 text-center">No contacts found</p>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-black/50 text-amber-200">
-                                        <tr>
-                                            <th className="px-6 py-3">Name</th>
-                                            <th className="px-6 py-3">Business</th>
-                                            <th className="px-6 py-3">Email</th>
-                                            <th className="px-6 py-3">Phone</th>
-                                            <th className="px-6 py-3">Type</th>
-                                            <th className="px-6 py-3">Date</th>
-                                            <th className="px-6 py-3">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {contacts?.map((contact) => (
-                                            <tr
-                                                key={contact._id.toString()}
-                                                className={`border-b border-gray-800 hover:bg-black/30 transition-colors ${!contact.isRead ? "bg-amber-900/20" : ""}`}
-                                            >
-                                                <td className="px-6 py-4 font-medium text-white">{contact.name}</td>
-                                                <td className="px-6 py-4 text-gray-300">{contact.businessName}</td>
-                                                <td className="px-6 py-4 text-gray-300">{contact.email}</td>
-                                                <td className="px-6 py-4 text-gray-300">{contact.phone}</td>
-                                                <td className="px-6 py-4">
-                                                    <span className="bg-orange-900/20 text-orange-300 text-xs font-medium px-2.5 py-1 rounded">
-                                                        {contact.formType}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-300">{formatDate(contact.createdAt)}</td>
-                                                <td className="px-6 py-4">
-                                                    {!contact.isRead && (
-                                                        <button
-                                                            onClick={() => handleMarkAsRead(contact._id)}
-                                                            className="text-xs bg-green-900/20 hover:bg-green-900/40 text-green-300 px-2 py-1 rounded mr-2"
-                                                        >
-                                                            Mark as Read
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        className="text-xs bg-blue-900/20 hover:bg-blue-900/40 text-blue-300 px-2 py-1 rounded"
-                                                    >
-                                                        View Details
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                </div>
+  return (
+    <div className="min-h-screen bg-black text-white p-8">
+      <div className="container mx-auto">
+        <h1 className="text-3xl font-bold mb-6">Contact Form Submissions</h1>
+        
+        {contacts === undefined ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-xl">Loading submissions...</div>
+          </div>
+        ) : contacts.length === 0 ? (
+          <div className="bg-gray-800 rounded-lg p-8 text-center">
+            <p className="text-lg text-gray-400">No contact form submissions yet.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-1 bg-gray-900 rounded-lg p-4 h-fit">
+              <h2 className="text-xl font-bold mb-4 text-amber-300">All Submissions</h2>
+              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
+                {contacts.map((contact) => (
+                  <div 
+                    key={contact._id} 
+                    className={`p-3 rounded-lg cursor-pointer transition-all ${
+                      selectedContact?._id === contact._id 
+                        ? "bg-amber-900/50 border border-amber-500/50" 
+                        : "bg-gray-800 hover:bg-gray-700"
+                    }`}
+                    onClick={() => setSelectedContact(contact)}
+                  >
+                    <p className="font-medium">{contact.name}</p>
+                    <p className="text-sm text-gray-400">{contact.email}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {new Date(contact._creationTime).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-        </div>
-    );
+
+            <div className="md:col-span-2">
+              {selectedContact ? (
+                <div className="bg-gray-900 rounded-lg p-6">
+                  <h2 className="text-xl font-bold mb-4 text-amber-300">Contact Details</h2>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-sm text-gray-400">Name</h3>
+                      <p className="text-lg">{selectedContact.name}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm text-gray-400">Email</h3>
+                      <p className="text-lg">{selectedContact.email}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm text-gray-400">Phone</h3>
+                      <p className="text-lg">{selectedContact.phone || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm text-gray-400">Business Name</h3>
+                      <p className="text-lg">{selectedContact.businessName || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm text-gray-400">Consultation Type</h3>
+                      <p className="text-lg">{selectedContact.consultationType || "General"}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm text-gray-400">Message</h3>
+                      <p className="text-lg whitespace-pre-wrap">{selectedContact.message || "No message"}</p>
+                    </div>
+                    {selectedContact.companySize && (
+                      <div>
+                        <h3 className="text-sm text-gray-400">Company Size</h3>
+                        <p className="text-lg">{selectedContact.companySize}</p>
+                      </div>
+                    )}
+                    {selectedContact.budget && (
+                      <div>
+                        <h3 className="text-sm text-gray-400">Budget</h3>
+                        <p className="text-lg">{selectedContact.budget}</p>
+                      </div>
+                    )}
+                    {selectedContact.timeframe && (
+                      <div>
+                        <h3 className="text-sm text-gray-400">Timeframe</h3>
+                        <p className="text-lg">{selectedContact.timeframe}</p>
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="text-sm text-gray-400">Submission Date</h3>
+                      <p className="text-lg">{new Date(selectedContact._creationTime).toLocaleString()}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gray-900 rounded-lg p-8 flex items-center justify-center h-full">
+                  <p className="text-gray-400">Select a contact to view details</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

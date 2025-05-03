@@ -1,18 +1,15 @@
-version: "3.8"
+version: "3"
 
 services:
   convex:
-    image: convex/server:latest
+    image: ghcr.io/get-convex/convex-backend:latest
     container_name: convex-server
     ports:
-      - "8000:8000" # API port
-      - "8001:8001" # Admin dashboard
+      - "8000:3210" # Convex API - maps container port 3210 to host port 8000
+      - "8001:3211" # Admin Dashboard - maps container port 3211 to host port 8001
     environment:
-      - CONVEX_ADMIN_PASSWORD=your_secure_password_here # Replace with your secure password
-      - CONVEX_HOST_DOMAIN=your_vm_domain_or_ip_here # e.g., convex.yourdomain.com or VM's IP address
+      - CONVEX_ADMIN_USER=admin
+      - CONVEX_ADMIN_PASSWORD=admin_password
+      - CONVEX_DASHBOARD_PORT=3211
     volumes:
       - ./convex-data:/data
-    restart: unless-stopped
-
-volumes:
-  convex-data:

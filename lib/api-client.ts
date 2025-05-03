@@ -27,10 +27,7 @@ export class SharedApiClient {
   // Method to submit contact form data
   async submitContactForm(formData: ContactFormData): Promise<string> {
     try {
-      const result = await this.client.mutation(
-        api.contacts.submitContactForm,
-        formData
-      );
+      const result = await this.client.mutation(api.contacts.create, formData);
       return result;
     } catch (error) {
       console.error("Error submitting contact form:", error);

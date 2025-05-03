@@ -14,7 +14,7 @@ export function useContactForm() {
 
   // Get the mutation function from Convex
   // Use optional chaining to handle possible undefined API during initialization
-  const submitForm = useMutation(api?.contacts?.submitContactForm);
+  const submitForm = useMutation(api?.contacts?.create);
 
   // Function to handle form submission
   const handleSubmit = async (
