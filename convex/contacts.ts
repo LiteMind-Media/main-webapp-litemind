@@ -33,7 +33,7 @@ export const create = mutation({
       createdAt: Date.now(),
       isRead: false,
     });
-    
+
     return contactId;
   },
 });

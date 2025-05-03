@@ -1,52 +1,43 @@
 #!/bin/bash
 
-# Configuration - Update these values with your actual VM information
-VM_USER="your-vm-username"
-VM_IP="your-vm-ip-address"
-VM_PATH="/home/$VM_USER/litemind-webapp"
+# Configuration for Convex self-hosted on this VM
+VM_IP="35.209.122.201"
+DATA_PATH="/root/convex-data"
 CONVEX_ADMIN_PASSWORD="admin_password"  # Change this to a secure password
 
 # Colors for better visibility
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${YELLOW}=== LiteMind Media Cloud Deployment ===${NC}"
-echo -e "${GREEN}This script will deploy your application and Convex database to your cloud VM${NC}"
+echo -e "${YELLOW}=== Convex Self-Hosted Deployment ===${NC}"
+echo -e "${GREEN}This script will deploy Convex database on this VM${NC}"
 
-# Create a production .env file with VM-specific values
-echo -e "${YELLOW}Creating production environment file...${NC}"
-cat > .env.production << EOF
-# Self-hosted Convex Configuration
-NEXT_PUBLIC_CONVEX_URL=http://${VM_IP}:8000
-CONVEX_ADMIN_URL=http://${VM_IP}:8001
-CONVEX_ADMIN_USER=admin
-CONVEX_ADMIN_PASSWORD=${CONVEX_ADMIN_PASSWORD}
-CONVEX_HOST_DOMAIN=${VM_IP}
+# Check for docker and docker-compose
+if ! command -v docker &> /dev/null; then
+    echo -e "\n${YELLOW}Docker not found. Installing Docker...${NC}"
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sh get-docker.sh
+fi
 
-# Comment out cloud deployment settings to avoid conflicts
-# CONVEX_DEPLOYMENT=local:local-litemind_media-litemind_webapp
-# CONVEX_DEPLOYMENT=dev:keen-minnow-926
-# NEXT_PUBLIC_CONVEX_URL=https://keen-minnow-926.convex.cloud
-EOF
+if ! command -v docker-compose &> /dev/null; then
+    echo -e "\n${YELLOW}Docker Compose not found. Installing Docker Compose...${NC}"
+    curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+    ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
+fi
 
-# Create a docker-compose file specifically for the VM deployment
-echo -e "${YELLOW}Creating Docker Compose file for VM...${NC}"
-cat > docker-compose.vm.yml << EOF
+# Create directories
+echo -e "\n${YELLOW}Creating data directory...${NC}"
+mkdir -p $DATA_PATH
+
+# Create a docker-compose file specifically for the Convex deployment
+echo -e "\n${YELLOW}Creating Docker Compose file for Convex...${NC}"
+cat > docker-compose.yml << EOF
 version: "3"
 
 services:
-  # Next.js application
-  webapp:
-    build: .
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_CONVEX_URL=http://${VM_IP}:8000
-    depends_on:
-      - convex
-
   # Self-hosted Convex
   convex:
     image: ghcr.io/get-convex/convex-backend:latest
@@ -60,71 +51,63 @@ services:
       - CONVEX_ADMIN_PASSWORD=${CONVEX_ADMIN_PASSWORD}
       - CONVEX_DASHBOARD_PORT=3211
     volumes:
-      - ./convex-data:/data
+      - ${DATA_PATH}:/data
 EOF
-
-# Create a deployment package excluding unnecessary files
-echo -e "${YELLOW}Creating deployment package...${NC}"
-tar --exclude="node_modules" --exclude=".next" --exclude=".git" --exclude="convex-data" -czf deploy.tar.gz .
-
-# Copy files to the VM
-echo -e "${YELLOW}Copying files to VM at ${VM_IP}...${NC}"
-scp deploy.tar.gz $VM_USER@$VM_IP:~/ 
-
-# Create a remote setup script
-cat > remote-setup.sh << EOF
-#!/bin/bash
-
-# Extract the application
-mkdir -p $VM_PATH
-tar -xzf ~/deploy.tar.gz -C $VM_PATH
-cd $VM_PATH
-
-# Move docker-compose.vm.yml to docker-compose.yml
-mv docker-compose.vm.yml docker-compose.yml
-
-# Set up Nginx configuration
-if [ -d /etc/nginx/sites-available ]; then
-  sudo cp nginx.conf /etc/nginx/sites-available/litemind-webapp
-  sudo ln -sf /etc/nginx/sites-available/litemind-webapp /etc/nginx/sites-enabled/
-  sudo nginx -t && sudo systemctl restart nginx
-else
-  echo "Nginx sites-available directory not found. Please configure Nginx manually."
-fi
-
-# Create necessary directories
-mkdir -p $VM_PATH/convex-data
 
 # Stop any existing containers
-docker-compose down
+echo -e "\n${YELLOW}Stopping any existing containers...${NC}"
+docker-compose down 2>/dev/null || true
 
-# Build and start containers
+# Pull the latest Convex image
+echo -e "\n${YELLOW}Pulling the latest Convex image...${NC}"
+docker pull ghcr.io/get-convex/convex-backend:latest
+
+# Start Convex container
+echo -e "\n${YELLOW}Starting Convex container...${NC}"
 docker-compose up -d
 
-# Wait for Convex to be available
-echo "Waiting for Convex to start up (30 seconds)..."
-sleep 30
+# Check if container is running
+if docker ps | grep -q convex-server; then
+    echo -e "\n${GREEN}✅ Convex container is running successfully!${NC}"
+else
+    echo -e "\n${RED}⚠️ Convex container failed to start properly.${NC}"
+    echo -e "Check logs with: docker logs convex-server"
+    exit 1
+fi
 
-# Deploy Convex schema
-cd $VM_PATH
-CONVEX_URL=http://localhost:8000 npx convex deploy
+# Wait a moment for Convex to initialize
+echo -e "\n${YELLOW}Waiting for Convex to initialize (15 seconds)...${NC}"
+sleep 15
 
-echo "Deployment complete! You can access:"
-echo "- Website: http://${VM_IP}:3000"
-echo "- Convex API: http://${VM_IP}:8000"
-echo "- Admin Dashboard: http://${VM_IP}:8001"
-EOF
+# Test the connection
+echo -e "\n${YELLOW}Testing connection to Convex API...${NC}"
+if curl -s --head --request GET http://localhost:8000 | grep "200" > /dev/null; then 
+    echo -e "${GREEN}✅ Convex API is accessible locally!${NC}"
+    
+    # Check if it's accessible from the outside
+    if curl -s --head --request GET http://${VM_IP}:8000 | grep "200" > /dev/null; then 
+        echo -e "${GREEN}✅ Convex API is accessible externally!${NC}"
+    else
+        echo -e "${YELLOW}⚠️ Convex API might not be accessible externally. Check firewall settings.${NC}"
+    fi
+else
+    echo -e "${RED}⚠️ Convex API is not responding. Check container logs.${NC}"
+    docker logs convex-server
+fi
 
-# Copy and execute remote setup script
-scp remote-setup.sh $VM_USER@$VM_IP:~/
-ssh $VM_USER@$VM_IP "chmod +x ~/remote-setup.sh && ~/remote-setup.sh"
-
-# Clean up local files
-echo -e "${YELLOW}Cleaning up local files...${NC}"
-rm deploy.tar.gz remote-setup.sh
-
-echo -e "${GREEN}Deployment completed!${NC}"
-echo -e "${GREEN}Your application is now available at: http://${VM_IP}:3000${NC}"
+echo -e "\n${GREEN}Deployment completed!${NC}"
 echo -e "${GREEN}Your Convex API is available at: http://${VM_IP}:8000${NC}"
 echo -e "${GREEN}Your Admin Dashboard is available at: http://${VM_IP}:8001${NC}"
-echo -e "${YELLOW}NOTE: If this is your first deployment, you may need to wait a few minutes for everything to initialize.${NC}"
+echo -e "${GREEN}Username: admin${NC}"
+echo -e "${GREEN}Password: ${CONVEX_ADMIN_PASSWORD}${NC}"
+
+# Instructions for updating your application
+echo -e "\n${YELLOW}Next Steps:${NC}"
+echo -e "1. Update your application's .env file with the following values:"
+echo -e "   NEXT_PUBLIC_CONVEX_URL=http://${VM_IP}:8000"
+echo -e "   CONVEX_ADMIN_URL=http://${VM_IP}:8001"
+echo -e "   CONVEX_ADMIN_USER=admin"
+echo -e "   CONVEX_ADMIN_PASSWORD=${CONVEX_ADMIN_PASSWORD}"
+echo -e "   CONVEX_HOST_DOMAIN=${VM_IP}"
+echo -e "\n2. Deploy your Convex schema to this self-hosted instance:"
+echo -e "   CONVEX_URL=http://${VM_IP}:8000 npx convex deploy"
